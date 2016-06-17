@@ -131,12 +131,9 @@ map f (h :. t) = f h :. map f t
 -- prop> filter (const True) x == x
 --
 -- prop> filter (const False) x == Nil
-filter ::
-  (a -> Bool)
-  -> List a
-  -> List a
-filter =
-  error "todo: Course.List#filter"
+filter :: (a -> Bool) -> List a -> List a
+filter f = foldLeft step Nil
+    where step acc x = if f x then x :. acc else acc
 
 -- | Append two lists to a new list.
 --
@@ -150,12 +147,9 @@ filter =
 -- prop> (x ++ y) ++ z == x ++ (y ++ z)
 --
 -- prop> x ++ Nil == x
-(++) ::
-  List a
-  -> List a
-  -> List a
-(++) =
-  error "todo: Course.List#(++)"
+(++) :: List a -> List a -> List a
+(++) l1 l2 = foldLeft step l2 l1
+    where step acc x = x :. acc
 
 infixr 5 ++
 
@@ -169,11 +163,9 @@ infixr 5 ++
 -- prop> headOr x (flatten (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> sum (map length x) == length (flatten x)
-flatten ::
-  List (List a)
-  -> List a
-flatten =
-  error "todo: Course.List#flatten"
+flatten :: List (List a) -> List a
+flatten = foldRight step Nil
+    where step xs acc = foldRight (\x iAcc -> x :. iAcc) acc xs
 
 -- | Map a function then flatten to a list.
 --
@@ -189,8 +181,8 @@ flatMap ::
   (a -> List b)
   -> List a
   -> List b
-flatMap =
-  error "todo: Course.List#flatMap"
+flatMap _ Nil = undefined
+
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
