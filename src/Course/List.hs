@@ -72,7 +72,7 @@ foldLeft f b (h :. t) = let b' = f b h in b' `seq` foldLeft f b' t
 --
 -- prop> x `headOr` Nil == x
 headOr :: a -> List a -> a
-headOr _ (h :. t) = h
+headOr _ (h :. _) = h
 headOr d Nil = d
 
 -- | The product of the elements of a list.
@@ -106,7 +106,7 @@ sum = foldLeft (+) 0
 --
 -- prop> sum (map (const 1) x) == length x
 length :: List a -> Int
-length = sum . map (\x -> 1)
+length = sum . map (\_ -> 1)
 
 
 -- | Map the given function on each element of the list.
@@ -177,22 +177,16 @@ flatten = foldRight step Nil
 -- prop> headOr x (flatMap id (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> flatMap id (x :: List (List Int)) == flatten x
-flatMap ::
-  (a -> List b)
-  -> List a
-  -> List b
-flatMap _ Nil = undefined
+flatMap :: (a -> List b) -> List a -> List b
+flatMap f xs = flatten $ map f xs
 
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
 --
 -- prop> let types = x :: List (List Int) in flatten x == flattenAgain x
-flattenAgain ::
-  List (List a)
-  -> List a
-flattenAgain =
-  error "todo: Course.List#flattenAgain"
+flattenAgain :: List (List a) -> List a
+flattenAgain = flatMap id
 
 -- | Convert a list of optional values to an optional list of values.
 --
@@ -216,11 +210,12 @@ flattenAgain =
 --
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
-seqOptional ::
-  List (Optional a)
-  -> Optional (List a)
-seqOptional =
-  error "todo: Course.List#seqOptional"
+seqOptional :: List (Optional a) -> Optional (List a)
+seqOptional = undefined
+
+
+-- Full [Lista]
+-- Empty
 
 -- | Find the first element in the list matching the predicate.
 --
@@ -238,12 +233,11 @@ seqOptional =
 --
 -- >>> find (const True) infinity
 -- Full 0
-find ::
-  (a -> Bool)
-  -> List a
-  -> Optional a
-find =
-  error "todo: Course.List#find"
+find :: (a -> Bool) -> List a -> Optional a
+find _ Nil = Empty
+find p (h :. t)
+    | p h = Full h
+    | otherwise = find p t
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -258,11 +252,10 @@ find =
 --
 -- >>> lengthGT4 infinity
 -- True
-lengthGT4 ::
-  List a
-  -> Bool
-lengthGT4 =
-  error "todo: Course.List#lengthGT4"
+lengthGT4 :: List a -> Bool
+lengthGT4 = lIter 0
+    where lIter n (_ :. t) | n > 4 = True | otherwise = lIter (n+1) t
+          lIter n Nil      | n > 4 = True | otherwise = False
 
 -- | Reverse a list.
 --
@@ -275,11 +268,9 @@ lengthGT4 =
 -- prop> let types = x :: List Int in reverse x ++ reverse y == reverse (y ++ x)
 --
 -- prop> let types = x :: Int in reverse (x :. Nil) == x :. Nil
-reverse ::
-  List a
-  -> List a
-reverse =
-  error "todo: Course.List#reverse"
+reverse :: List a -> List a
+reverse = foldLeft step Nil
+  where step acc x = x :. acc
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
@@ -289,12 +280,9 @@ reverse =
 --
 -- >>> let (x:.y:.z:.w:._) = produce (*2) 1 in [x,y,z,w]
 -- [1,2,4,8]
-produce ::
-  (a -> a)
-  -> a
-  -> List a
-produce =
-  error "todo: Course.List#produce"
+produce :: (a -> a) -> a -> List a
+produce g x = (x :. produce g (g x))
+
 
 -- | Do anything other than reverse a list.
 -- Is it even possible?
@@ -305,11 +293,11 @@ produce =
 -- prop> let types = x :: List Int in notReverse x ++ notReverse y == notReverse (y ++ x)
 --
 -- prop> let types = x :: Int in notReverse (x :. Nil) == x :. Nil
-notReverse ::
-  List a
-  -> List a
-notReverse =
-  error "todo: Is it even possible?"
+notReverse :: (Ord a) =>  List a -> List a
+notReverse (x :. y :. xs)
+    | x < y = x :. y :. notReverse xs
+    | x > y = y :. x :. notReverse xs
+notReverse x = x
 
 ---- End of list exercises
 
