@@ -211,7 +211,13 @@ flattenAgain = flatMap id
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
 seqOptional :: List (Optional a) -> Optional (List a)
-seqOptional = undefined
+seqOptional xs = case seqOptionalIter xs of
+                      Nil -> Empty
+                      ls -> Full ls
+    where seqOptionalIter Nil = Nil
+          seqOptionalIter (h :. t) = case h of
+                                          Empty -> Nil
+                                          Full (x) -> x :. seqOptionalIter t
 
 
 -- Full [Lista]
