@@ -217,10 +217,7 @@ seqOptional xs
     | otherwise = Full (seqOptionalIter xs)
     where seqOptionalIter Nil = Nil
           seqOptionalIter ((Full x) :. t) = x :. seqOptionalIter t
-
-  --        case h of
-  --                                      Empty -> Nil
-  --                                      Full (x) -> x :. seqOptionalIter t
+          seqOptionalIter (Empty :. _) = error "Empty in the sequence#seqOptional"
 
 -- Full [Lista]
 -- Empty
