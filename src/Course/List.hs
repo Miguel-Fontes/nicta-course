@@ -132,7 +132,7 @@ map f (h :. t) = f h :. map f t
 --
 -- prop> filter (const False) x == Nil
 filter :: (a -> Bool) -> List a -> List a
-filter f = foldLeft step Nil
+filter f = reverse . foldLeft step Nil
     where step acc x = if f x then x :. acc else acc
 
 -- | Append two lists to a new list.
